@@ -11,7 +11,7 @@ import json
 import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from groq import AsyncGroq
 
@@ -23,14 +23,10 @@ client = AsyncGroq(api_key=os.environ.get("GROQ_API_KEY"))
 app = FastAPI()
 
 # 2. DEFINICIÓN DE RUTAS (ENDPOINTS)
-
+# Ruta principal que sirve directamente la interfaz web estática
 @app.get("/")
 async def raiz():
-    """
-    Ruta raíz. Redirige automáticamente al usuario a la interfaz principal (index.html)
-    cuando entra a la URL base (localhost:8000).
-    """
-    return RedirectResponse(url="/static/index.html")
+    return FileResponse("static/index.html")
 
 # Montamos la carpeta 'static' para que FastAPI pueda servir archivos HTML, JS y CSS
 app.mount("/static", StaticFiles(directory="static"), name="static")
