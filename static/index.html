@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- 
+      Proyecto: Weather & Style AI (Interfaz de Usuario)
+      Autor: Alejandro Cuéllar
+      Descripción: Frontend estático diseñado con HTML5 semántico y estilizado 
+                   con Tailwind CSS mediante CDN. El diseño es Responsive (Mobile-First).
+    -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather & Style AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos personalizados para la barra de desplazamiento lateral */
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-950 text-white min-h-screen font-sans antialiased flex flex-col items-center p-4 md:p-8">
+
+    <main class="w-full max-w-4xl bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-2xl backdrop-blur">
+        
+        <!-- ================= HEADER ================= -->
+        <header class="text-center mb-6">
+            <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-sky-400 to-indigo-400 bg-clip-text text-transparent flex items-center justify-center gap-2">
+                🌤️ Weather & Style AI
+            </h1>
+            <p class="text-slate-400 text-sm mt-1">Estilista hiperpersonalizado adaptado a tu perfil, marcas y el clima exacto.</p>
+        </header>
+
+        <!-- ================= FORMULARIO DE ENTRADA ================= -->
+        <section class="space-y-3 mb-6" aria-label="Formulario de preferencias">
+            
+            <!-- Barra de Búsqueda con Autocompletado -->
+            <div class="flex gap-2 relative">
+                <input type="text" id="input-ciudad" placeholder="Escribe una ciudad (ej. Madrid, Barcelona, Llanes)..." 
+                       class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-sky-500 transition">
+                <button id="btn-buscar" class="bg-sky-600 hover:bg-sky-500 text-white font-semibold px-6 py-3 rounded-xl transition flex items-center gap-2">
+                    🔍 Buscar
+                </button>
+                <!-- Menú desplegable dinámico gestionado por script.js -->
+                <div id="lista-sugerencias" class="hidden absolute top-14 left-0 w-full bg-slate-800 border border-slate-700 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto"></div>
+            </div>
+
+            <!-- Fila 1: Plan de Actividad y Género -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <input type="text" id="input-plan" placeholder="¿Plan? (ej. cena elegante, ruta por la montaña, playa...)" 
+                       class="md:col-span-3 bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-sky-500 transition">
+                
+                <select id="select-genero" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500 transition">
+                    <option value="Hombre">Hombre ♂</option>
+                    <option value="Mujer">Mujer ♀</option>
+                    <option value="Unisex">Unisex / Indiferente</option>
+                </select>
+            </div>
+
+            <!-- Fila 2: Filtros de Estilo -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <select id="select-edad" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500 transition">
+                    <option value="18-24 años">Edad: 18 - 24 años</option>
+                    <option value="25-35 años">Edad: 25 - 35 años</option>
+                    <option value="36-50 años">Edad: 36 - 50 años</option>
+                    <option value="+50 años">Edad: +50 años</option>
+                </select>
+
+                <select id="select-estilo-base" class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500 transition">
+                    <option value="Casual">Casual / Diario</option>
+                    <option value="Deportivo">Deportivo / Sport</option>
+                    <option value="Arreglado">Arreglado / Formal</option>
+                    <option value="Fiesta">Fiesta / Noche</option>
+                </select>
+
+                <input type="text" id="input-tendencia" placeholder="Tendencia (ej. Old Money, Y2K...)" 
+                       class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-sky-500 transition">
+
+                <input type="text" id="input-marcas" placeholder="Marcas (ej. Zara, Nike...)" 
+                       class="bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-sky-500 transition">
+            </div>
+        </section>
+
+        <!-- ================= SPINNER DE CARGA ================= -->
+        <div id="loader" class="hidden text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-sky-500 border-t-transparent"></div>
+            <p class="text-slate-400 text-sm mt-3">Consultando el clima y creando tu outfit personalizado...</p>
+        </div>
+
+        <!-- ================= ZONA DE RESULTADOS ================= -->
+        <section id="resultado-container" class="hidden space-y-6" aria-live="polite">
+            
+            <!-- Panel del Clima Actual -->
+            <div class="bg-slate-800/50 border border-slate-700/60 rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <span id="icono-clima-actual" class="text-5xl">☀️</span>
+                    <div>
+                        <h2 id="nombre-ciudad-res" class="text-2xl font-bold text-white">---</h2>
+                        <p id="descripcion-clima" class="text-sm text-slate-400">Tiempo actual</p>
+                    </div>
+                </div>
+                <!-- Métricas Meteorológicas -->
+                <div class="grid grid-cols-4 gap-4 text-center w-full md:w-auto">
+                    <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">
+                        <span class="text-xs text-slate-400 block">Temp.</span>
+                        <span id="val-temp" class="text-base font-bold text-sky-400">--°C</span>
+                    </div>
+                    <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">
+                        <span class="text-xs text-slate-400 block">Sensación</span>
+                        <span id="val-sensacion" class="text-base font-bold text-sky-400">--°C</span>
+                    </div>
+                    <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">
+                        <span class="text-xs text-slate-400 block">Viento</span>
+                        <span id="val-viento" class="text-base font-bold text-sky-400">-- km/h</span>
+                    </div>
+                    <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800">
+                        <span class="text-xs text-slate-400 block">Humedad</span>
+                        <span id="val-humedad" class="text-base font-bold text-sky-400">--%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel de Pronóstico por Horas -->
+            <div>
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Pronóstico Próximas 24 Horas</h3>
+                <div id="contenedor-horas" class="flex gap-3 overflow-x-auto pb-2 custom-scrollbar"></div>
+            </div>
+
+            <!-- Panel de Recomendación de la Inteligencia Artificial -->
+            <div id="resultado-estilista" class="bg-gradient-to-b from-slate-800/80 to-slate-900/80 border border-slate-700/80 rounded-xl p-5 shadow-lg"></div>
+
+        </section>
+
+    </main>
+
+    <!-- Créditos -->
+    <footer class="w-full text-center py-6 mt-10 text-gray-500 text-sm border-t border-gray-200">
+        <p>Creado con ❤️ por <span class="font-semibold text-gray-700">Alejandro Cuéllar </span></p>
+        <a href="https://github.com/alejandrochcampusfp" target="_blank" class="text-blue-500 hover:underline mt-1 inline-block">
+            GitHub: @alejandrochcampusfp
+        </a>
+    </footer>
+
+    <!-- Vinculación del script principal -->
+    <script src="/static/script.js"></script>
+</body>
+</html>
