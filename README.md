@@ -66,6 +66,7 @@ La aplicación estará disponible en: http://localhost:8000
 
 
 ## 📁 Estructura del Proyecto
+```
 weather-style-ai/
 │
 ├── main.py                # Backend: Rutas de FastAPI y lógica de servidor
@@ -74,6 +75,7 @@ weather-style-ai/
 └── static/
     ├── index.html         # Frontend: Estructura de la interfaz
     └── script.js          # Frontend: Lógica de cliente, fetch y manipulación del DOM
+````
 
 
 ## 👨‍💻 Autor
