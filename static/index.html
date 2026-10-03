@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- 
+      Proyecto: Weather & Style AI (Frontend)
+      Autor: Alejandro Cuéllar
+      Descripción: Interfaz limpia con Tailwind CSS. Incluye buscador, 
+                   filtros y gestión del historial de outfits.
+    -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather & Style AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Estilos personalizados para la barra de scroll de las horas y favoritos */
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen font-sans antialiased flex flex-col items-center p-4 md:p-8">
+
+    <main class="w-full max-w-4xl bg-white border border-slate-200 rounded-2xl p-6 shadow-xl relative">
+        
+        <!-- Botón de acceso al historial -->
+        <div class="absolute top-6 right-6 z-10">
+            <button id="btn-ver-favoritos" class="bg-white hover:bg-slate-50 border border-slate-300 text-sm text-slate-700 px-4 py-2 rounded-lg transition flex items-center gap-2 shadow-sm font-medium">
+                📂 Mis Outfits
+            </button>
+        </div>
+
+        <!-- Cabecera -->
+        <header class="text-center mb-8 pt-10 md:pt-4">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 flex items-center justify-center gap-2 tracking-tight">
+                Weather & Style
+            </h1>
+            <p class="text-slate-500 text-sm mt-2 font-medium">Recomendaciones de estilo basadas en el clima y tus preferencias.</p>
+        </header>
+
+        <!-- Contenedor principal de búsqueda y filtros -->
+        <section id="seccion-formulario" class="space-y-4 mb-6" aria-label="Formulario de preferencias">
+            
+            <!-- Buscador de ciudad con autocompletado -->
+            <div class="flex gap-2 relative">
+                <input type="text" id="input-ciudad" placeholder="Escribe una ciudad (ej. Madrid, Barcelona)..." 
+                       class="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition shadow-sm">
+                <button id="btn-buscar" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-xl transition flex items-center gap-2 shadow-sm">
+                    Buscar
+                </button>
+                <div id="lista-sugerencias" class="hidden absolute top-14 left-0 w-full bg-white border border-slate-200 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto"></div>
+            </div>
+
+            <!-- Filtros primarios (Plan, fecha y género) -->
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                <input type="text" id="input-plan" placeholder="¿Plan? (ej. cena, oficina, ruta...)" 
+                       class="md:col-span-2 bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition shadow-sm">
+                
+                <select id="select-dia" class="md:col-span-2 bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition font-medium shadow-sm">
+                    <option value="0">Para Hoy</option>
+                    <option value="1">Para Mañana</option>
+                    <option value="2">Para Pasado Mañana</option>
+                    <option value="3">En 3 días</option>
+                    <option value="4">En 4 días</option>
+                </select>
+
+                <select id="select-genero" class="bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition shadow-sm">
+                    <option value="Hombre">Hombre</option>
+                    <option value="Mujer">Mujer</option>
+                    <option value="Unisex">Unisex</option>
+                </select>
+            </div>
+
+            <!-- Filtros secundarios (Estilo y edad) -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <select id="select-edad" class="bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition shadow-sm">
+                    <option value="18-24 años">18 - 24 años</option>
+                    <option value="25-35 años">25 - 35 años</option>
+                    <option value="36-50 años">36 - 50 años</option>
+                    <option value="+50 años">+50 años</option>
+                </select>
+
+                <select id="select-estilo-base" class="bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition shadow-sm">
+                    <option value="Casual">Casual / Diario</option>
+                    <option value="Deportivo">Deportivo</option>
+                    <option value="Arreglado">Arreglado</option>
+                    <option value="Fiesta">Fiesta / Noche</option>
+                </select>
+
+                <input type="text" id="input-tendencia" placeholder="Estilo (ej. Minimalista)" 
+                       class="bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition shadow-sm">
+
+                <input type="text" id="input-marcas" placeholder="Marcas (ej. Zara)" 
+                       class="bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition shadow-sm">
+            </div>
+        </section>
+
+        <!-- Indicador de carga -->
+        <div id="loader" class="hidden text-center py-16">
+            <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-slate-200 border-t-blue-600"></div>
+            <p class="text-slate-500 text-sm mt-4 font-medium">Analizando condiciones y generando propuesta...</p>
+        </div>
+
+        <!-- Panel de resultados (Clima + IA) -->
+        <section id="resultado-container" class="hidden space-y-6" aria-live="polite">
+            
+            <!-- Tarjeta del clima actual -->
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <span id="icono-clima-actual" class="text-4xl">☀️</span>
+                    <div>
+                        <h2 id="nombre-ciudad-res" class="text-xl font-bold text-slate-900">---</h2>
+                        <p id="descripcion-clima" class="text-sm text-slate-500">Tiempo actual</p>
+                        <span id="fecha-res" class="inline-block mt-1 text-xs font-semibold px-2 py-1 bg-blue-100 text-blue-700 rounded-md">Día seleccionado</span>
+                    </div>
+                </div>
+                <!-- Métricas -->
+                <div class="grid grid-cols-4 gap-3 text-center w-full md:w-auto">
+                    <div class="bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm">
+                        <span class="text-xs text-slate-400 block font-medium">Temp.</span>
+                        <span id="val-temp" class="text-sm font-bold text-slate-800">--°C</span>
+                    </div>
+                    <div class="bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm">
+                        <span class="text-xs text-slate-400 block font-medium">Sensación</span>
+                        <span id="val-sensacion" class="text-sm font-bold text-slate-800">--°C</span>
+                    </div>
+                    <div class="bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm">
+                        <span class="text-xs text-slate-400 block font-medium">Viento</span>
+                        <span id="val-viento" class="text-sm font-bold text-slate-800">--</span>
+                    </div>
+                    <div class="bg-white p-2.5 rounded-lg border border-slate-200 shadow-sm">
+                        <span class="text-xs text-slate-400 block font-medium">Humedad</span>
+                        <span id="val-humedad" class="text-sm font-bold text-slate-800">--%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pronóstico por horas -->
+            <div>
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Previsión detallada</h3>
+                <div id="contenedor-horas" class="flex gap-3 overflow-x-auto pb-2 custom-scrollbar"></div>
+            </div>
+
+            <!-- Propuesta del estilista -->
+            <div id="resultado-estilista" class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm relative">
+                <!-- El contenido se inyecta dinámicamente desde script.js -->
+            </div>
+
+        </section>
+
+        <!-- Panel de favoritos (oculto por defecto) -->
+        <section id="panel-favoritos" class="hidden space-y-4">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-4">
+                <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">Tus Outfits Guardados</h2>
+                <button id="btn-cerrar-favoritos" class="text-slate-500 hover:text-slate-800 text-sm font-medium transition">Volver al inicio</button>
+            </div>
+            <div id="contenedor-lista-favoritos" class="space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
+                <!-- Los outfits se inyectan dinámicamente -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer limpio -->
+    <footer class="w-full text-center py-8 mt-4 text-slate-400 text-sm">
+        <p>Desarrollado por <span class="font-medium text-slate-600">Alejandro Cuéllar</span></p>
+    </footer>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
